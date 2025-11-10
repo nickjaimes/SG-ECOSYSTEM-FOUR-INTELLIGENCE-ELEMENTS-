@@ -1,0 +1,2 @@
+# SG-ECOSYSTEM-FOUR-INTELLIGENCE-ELEMENTS-
+sg core intelligence 
