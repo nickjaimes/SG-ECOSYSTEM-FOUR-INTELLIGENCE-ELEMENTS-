@@ -1,0 +1,140 @@
+1) State Space & Objects
+   •   Finite-dimensional complex Hilbert space: \mathcal{H}\cong \mathbb{C}^n with orthonormal basis \{|i\rangle\}_{i=1}^n.
+   •   Hypotheses / strategies / scenarios live as basis states or subspaces.
+   •   System state is a density matrix \rho \in \mathbb{C}^{n\times n}, \rho\succeq 0, \mathrm{Tr}(\rho)=1.
+(Pure state: \rho = |\psi\rangle\langle\psi| with \|\psi\|_2=1.)
+
+2) Observables, Context & Hamiltonian
+   •   Contextual observables: Hermitian set \mathcal{A}=\{A_k\}_{k=1}^m, A_k=A_k^\dagger.
+   •   Control parameters (from TRINITY policy): w_k \in \mathbb{R}.
+   •   Interaction graph (maps to QNSF connectivity): J_{ij} and local fields h_i.
+   •   Effective Hamiltonian
+H(t)= \sum_{k=1}^{m} w_k(t)\,A_k \;+\; \sum_{i<j} J_{ij}(t)\,\sigma_i^z\sigma_j^z \;+\; \sum_i h_i(t)\,\sigma_i^x,
+where \sigma^{x,z} are Pauli-like generators in chosen subspaces (not necessarily qubits; use block encodings as needed).
+
+3) Evolution (Unitary Core + Open-System Channels)
+   •   Unitary micro-step
+U(\Delta t)=\exp\!\big(-i\,H(t)\,\Delta t\big),\qquad \rho’ = U\rho U^\dagger.
+   •   General (open) update via CPTP map \mathcal{E} with Kraus \{K_\ell\}:
+\rho’=\mathcal{E}(\rho)=\sum_\ell K_\ell\,\rho\,K_\ell^\dagger,\qquad \sum_\ell K_\ell^\dagger K_\ell=I.
+
+Noise / Decoherence controls (from signal quality)
+
+\mathcal{D}_\gamma(\rho)=(1-\gamma)\rho \;+\; \gamma\,\mathrm{Diag}(\rho), \quad \gamma\in[0,1].
+
+4) Evidence Assimilation (EAGLE EYE → QUANTUM)
+   •   Evidence E becomes a likelihood operator \Lambda(E)\succeq 0.
+   •   Define a likelihood action L(E)=\exp\!\big(\tfrac{1}{2}\log(\Lambda(E)+\epsilon I)\big).
+   •   Bayesian-quantum update (POVM-compatible)
+\tilde{\rho} = L(E)\,\rho\,L(E)^\dagger, \qquad
+\rho’ = \frac{\tilde{\rho}}{\mathrm{Tr}(\tilde{\rho})}.
+(If discrete outcomes, use POVM \{M_j\} with p_j=\mathrm{Tr}(M_j\rho M_j^\dagger) and posterior \rho_j=M_j\rho M_j^\dagger/p_j.)
+
+5) Decision & Utility Functional
+   •   Actions as projectors or effects \{\Pi_a\} (0\preceq \Pi_a\preceq I).
+   •   Utility as Hermitian U (or \{U_a\} per action).
+   •   Expected utility of action a:
+\mathbb{E}[U|a]= \mathrm{Tr}(\rho\,\Pi_a U \Pi_a).
+   •   Selection rule (TRINITY can set temperature \tau):
+\pi(a)\;\propto\;\exp\!\Big(\frac{\mathbb{E}[U|a]}{\tau}\Big),
+\quad\text{or}\quad a^\star=\arg\max_a \mathbb{E}[U|a].
+
+6) Variational Principle (Free-Energy / Entropic Regularization)
+   •   Von Neumann entropy: S(\rho)=-\mathrm{Tr}(\rho\log\rho).
+   •   Free energy objective (temperature \tau>0, regularizer R):
+\mathcal{F}(\rho) = \mathrm{Tr}(\rho H) - \tau\,S(\rho) + \lambda\,R(\rho).
+   •   Stationary solution (max-entropy Boltzmann form):
+\rho^\star \;\propto\; \exp\!\Big(-\tfrac{1}{\tau}(H+\lambda\,\nabla R)\Big).
+   •   Mirror descent on density matrices (projected via matrix exponential):
+\rho_{k+1} \;\propto\; \exp\!\Big(\log\rho_k - \eta\,\nabla_\rho \mathcal{F}(\rho_k)\Big).
+
+7) Search / Planning Operators
+
+(a) Amplitude amplification (oracle-generalized)
+   •   Oracle O (phase flip on desirable subspace), diffusion D=2|\psi_0\rangle\langle\psi_0|-I.
+   •   Iterate G = D\,O on \rho (for mixed states, use conjugation channels).
+
+(b) Quantum-Annealing-style Optimization (Ising map)
+   •   Problem cost C(s) → problem Hamiltonian H_P, driver H_B.
+   •   Schedule A(t),B(t): H(t)=A(t)H_B+B(t)H_P.
+   •   Evolve \rho by U(t)=\mathcal{T}\exp(-i\int H(t)\,dt); readout via energy or decision POVM.
+
+(c) Tensor factorization & marginalization
+   •   Composite systems: \mathcal{H}=\bigotimes_r \mathcal{H}_r.
+   •   Fuse subproblems via \rho=\bigotimes_r \rho_r then couple with interaction terms; marginalize with partial trace \rho_{\!S}=\mathrm{Tr}_{\bar{S}}(\rho).
+
+8) Compression & Saliency (Decision-Preserving)
+   •   Low-rank projection: keep top-k eigenpairs \rho \approx \sum_{i=1}^k \lambda_i |v_i\rangle\langle v_i|.
+   •   Decision-aware projection: keep subspace that maximizes \sum_a \mathrm{Tr}(\rho \Pi_a U \Pi_a) subject to rank k.
+
+9) Coupling to QNSF (Neuromorphic Fabric)
+   •   Each QNSF region r hosts a local subspace \mathcal{H}r and parameters \theta_r=\{J{ij}^{(r)},h_i^{(r)},w_k^{(r)}\}.
+   •   Plasticity rule (STDP-like in Hamiltonian form):
+\Delta J_{ij}^{(r)} \;\propto\; \alpha\,\langle \sigma_i^z \sigma_j^z\rangle_{\rho_r}
+\;-\; \beta\, J_{ij}^{(r)}.
+   •   Temperature & priors \tau,\lambda,w_k are governed by TRINITY policy & risk.
+
+10) Governance Hooks (TRINITY AI)
+   •   Ethical constraint operator C \succeq 0; enforce with penalty \lambda\,\mathrm{Tr}(\rho C) or hard projector \rho \leftarrow \frac{P\rho P}{\mathrm{Tr}(P\rho)} with P the safe subspace.
+   •   Audit: integrity score I=\mathrm{Tr}(\rho\,Q) for audit observable Q.
+
+11) End-to-End Update Cycle (One SG “tick”)
+	1.	Sense (EAGLE): build \Lambda(E).
+	2.	Assimilate: \rho \leftarrow \frac{L\rho L^\dagger}{\mathrm{Tr}(L\rho L^\dagger)}.
+	3.	Evolve: apply U(\Delta t) or QA schedule; optional \mathcal{D}_\gamma.
+	4.	Variational step: mirror descent on \mathcal{F}.
+	5.	Project to safe set (TRINITY constraints).
+	6.	Decide: compute \pi(a) / a^\star.
+	7.	Learn: update \theta_r (QNSF plasticity) and TRINITY priors/temperature.
+
+12) Complexity & Resources
+   •   State storage O(n^2) (density). Use low-rank + tensor factorizations for O(nk).
+   •   One exponential map via Padé/Scaling-Squaring: \tilde{O}(n^3) (batched, GPU).
+   •   Kraus updates: O(L\,n^3) naïve; exploit sparsity / block-diagonal structure.
+   •   Annealing schedules parallelize across QNSF regions.
+
+13) Minimal Reference Pseudocode
+# rho: density (PSD, trace=1)
+# H(theta): context Hamiltonian
+# L(E): likelihood operator from evidence
+# P_safe: projector to safe subspace
+# tau, lambda: temperature & penalty (from TRINITY)
+
+def sg_quantum_tick(rho, theta, evidence, params):
+    # 1) Evidence assimilation
+    L = likelihood_operator(evidence)
+    rho = L @ rho @ L.conj().T
+    rho = rho / np.trace(rho)
+
+    # 2) Unitary/open evolution
+    U = expm(-1j * H(theta) * params.dt)
+    rho = U @ rho @ U.conj().T
+    rho = decohere(rho, gamma=params.gamma)
+
+    # 3) Variational mirror descent
+    grad = H(theta) - params.tau * (logm(rho) + np.eye(rho.shape[0])) + params.lambda_ * dR(rho)
+    rho = expm(logm(rho) - params.eta * grad)
+    rho = rho / np.trace(rho)
+
+    # 4) Safety projection
+    rho = P_safe @ rho @ P_safe
+    rho = rho / np.trace(rho)
+
+    # 5) Policy & action
+    scores = {a: np.trace(rho @ Pi[a] @ U_a[a] @ Pi[a]) for a in actions}
+    pi = softmax(np.array(list(scores.values()))/params.tau)
+    a_star = actions[np.argmax(pi)]
+
+    # 6) QNSF plasticity update (sketch)
+    theta.J += params.alpha * corr_sigma_z(rho) - params.beta * theta.J
+    return rho, a_star, pi, theta
+
+
+⸻
+
+Notes for Implementation
+   •   Use PSD-preserving updates (mirror descent with matrix exponential) to avoid numerical drift.
+   •   Keep rank-k approximations in large spaces and block-diagonalize by context.
+   •   Route \tau,\lambda,w_k from TRINITY’s ethics/risk controller; route evidence from EAGLE.
+   •   Compile heavy ops (expm, logm) with GPU or use Chebyshev / Krylov approximations.
+
